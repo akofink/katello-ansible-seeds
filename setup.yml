@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Clone ansible
+      git:
+        repo: https://github.com/theforeman/foreman-ansible-modules.git
+        dest: "{{ playbook_dir }}/foreman-ansible-modules"
+    - name: Install dependencies
+      pip:
+        requirements: "{{ playbook_dir }}/foreman-ansible-modules/requirements.txt"
+        extra_args: "--user"
