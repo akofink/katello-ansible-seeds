@@ -4,7 +4,16 @@
   - name: 'Load server vars'
     include_vars:
       file: server_vars.yml
-  - name: 'Create products'
+  - name: 'Upload a manifest'
+    katello_manifest:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      organization: Default Organization
+      manifest_path: "{{ katello_manifest_path }}"
+      state: present
+  - name: 'Create a custom product'
     katello_product:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -13,7 +22,7 @@
       name: custom
       organization: Default Organization
       state: present
-  - name: 'Create reposistories'
+  - name: 'Create custom yum repository'
     katello_repository:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -21,5 +30,30 @@
       verify_ssl: "{{ foreman_verify_ssl }}"
       name: zoo
       product: custom
+      content_type: yum
+      url: https://jlsherrill.fedorapeople.org/fake-repos/needed-errata/
       state: present
+  - name: "Enable RHEL 7 RPMs repositories"
+    katello_repository_set:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      name: "Red Hat Enterprise Linux 7 Server (RPMs)"
+      organization: "Default Organization"
+      product: "Red Hat Enterprise Linux Server"
+      repositories:
+      - releasever: "7Server"
+        basearch: "x86_64"
+      state: 'enabled'
+  - name: Sync RH repositories
+    katello_sync:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      organization: Default Organization
+      product: Red Hat Enterprise Linux Server
+      repository: Red Hat Enterprise Linux 7 Server RPMs X86_64 7Server
+      synchronous: no
 ...
