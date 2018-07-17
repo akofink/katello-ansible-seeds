@@ -1,10 +1,10 @@
 ---
 - hosts: localhost
   tasks:
-  - name: 'Load server vars'
+  - name: Load server vars
     include_vars:
       file: server_vars.yml
-  - name: 'Create the default org'
+  - name: Create the default org
     foreman_organization:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -12,7 +12,7 @@
       verify_ssl: "{{ foreman_verify_ssl }}"
       name: Default Organization
       state: present
-  # - name: 'Upload a manifest'
+  # - name: Upload a manifest
   #   katello_manifest:
   #     username: "{{ foreman_username }}"
   #     password: "{{ foreman_password }}"
@@ -21,7 +21,7 @@
   #     organization: Default Organization
   #     manifest_path: "{{ katello_manifest_path }}"
   #     state: present
-  - name: 'Create a custom product'
+  - name: Create a custom product
     katello_product:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -30,7 +30,7 @@
       name: custom
       organization: Default Organization
       state: present
-  - name: 'Create custom yum repository'
+  - name: Create custom yum repository
     katello_repository:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -42,7 +42,7 @@
       content_type: yum
       url: https://jlsherrill.fedorapeople.org/fake-repos/needed-errata/
       state: present
-  - name: "Enable RHEL 7 RPMs repositories"
+  - name: Enable RHEL 7 RPMs repositories
     katello_repository_set:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
