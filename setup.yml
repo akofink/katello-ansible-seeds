@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   tasks:
-    - name: Clone ansible
+    - name: Clone foreman-ansible-modules
       git:
         repo: https://github.com/theforeman/foreman-ansible-modules.git
         dest: "{{ playbook_dir }}/foreman-ansible-modules"
