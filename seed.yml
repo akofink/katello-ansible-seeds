@@ -4,6 +4,7 @@
   - name: Load server vars
     include_vars:
       file: server_vars.yml
+
   - name: Create the default org
     foreman_organization:
       username: "{{ foreman_username }}"
@@ -12,15 +13,7 @@
       verify_ssl: "{{ foreman_verify_ssl }}"
       name: Default Organization
       state: present
-  # - name: Upload a manifest
-  #   katello_manifest:
-  #     username: "{{ foreman_username }}"
-  #     password: "{{ foreman_password }}"
-  #     server_url: "{{ foreman_server_url }}"
-  #     verify_ssl: "{{ foreman_verify_ssl }}"
-  #     organization: Default Organization
-  #     manifest_path: "{{ katello_manifest_path }}"
-  #     state: present
+
   - name: Create a custom product
     katello_product:
       username: "{{ foreman_username }}"
@@ -41,6 +34,49 @@
       organization: Default Organization
       content_type: yum
       url: https://jlsherrill.fedorapeople.org/fake-repos/needed-errata/
+      state: present
+  - name: Create custom docker repository
+    katello_repository:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      name: alpine
+      product: custom
+      organization: Default Organization
+      content_type: docker
+      url: https://registry-1.docker.io/
+      docker_upstream_name: library/alpine
+      state: present
+  - name: Sync custom yum repository
+    katello_sync:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      organization: Default Organization
+      product: custom
+      repository: zoo
+      synchronous: no
+  - name: Sync custom docker repository
+    katello_sync:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      organization: Default Organization
+      product: custom
+      repository: alpine
+      synchronous: no
+
+  - name: Upload a manifest
+    katello_manifest:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      organization: Default Organization
+      manifest_path: "{{ katello_manifest_path }}"
       state: present
   - name: Enable RHEL 7 RPMs repositories
     katello_repository_set:
