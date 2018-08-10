@@ -1,7 +1,7 @@
 ---
 foreman_username: admin
-foreman_password: "changeme"
-foreman_server_url: "https://foreman.example.com"
+foreman_password: changeme
+foreman_server_url: https://foreman.example.com
 foreman_verify_ssl: false
 
 katello_manifest_path: /home/bob/Downloads/bob.zip
