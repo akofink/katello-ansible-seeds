@@ -1,7 +1,15 @@
 ---
 foreman_username: admin
 foreman_password: changeme
-foreman_server_url: https://foreman.example.com
+# foreman_server_url: https://centos7-devel-pulp217.virbr0.akofink-desktop
+foreman_server_url: https://centos7-devel.virbr0.akofink-desktop
+# foreman_server_url: https://centos7-katello-3-7.virbr0.akofink-desktop
+# foreman_server_url: https://centos7-katello-nightly.virbr0.akofink-desktop
+# foreman_server_url: https://sat-6-4-qa-rhel7.virbr0.akofink-desktop
+# foreman_server_url: https://sat-6-3-qa-rhel7.virbr0.akofink-desktop
+# foreman_server_url: https://sat-6-2-qa-rhel7.virbr0.akofink-desktop
 foreman_verify_ssl: false
+katello_manifest_path: /home/akofink/Documents/manifests/akofink.zip
 
-katello_manifest_path: /home/bob/Downloads/bob.zip
+# sync_repos: true
+# upload_manifest: true

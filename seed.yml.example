@@ -5,6 +5,15 @@
     include_vars:
       file: server_vars.yml
 
+  - name: Increase idle_timeout to 1 week
+    foreman_setting:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      name: idle_timeout
+      value: 10080
+
   - name: Create the default org
     foreman_organization:
       username: "{{ foreman_username }}"
@@ -48,7 +57,9 @@
       url: https://registry-1.docker.io/
       docker_upstream_name: library/alpine
       state: present
+
   - name: Sync custom yum repository
+    when: sync_repos | default(false)
     katello_sync:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -58,7 +69,9 @@
       product: custom
       repository: zoo
       synchronous: no
+
   - name: Sync custom docker repository
+    when: sync_repos | default(false)
     katello_sync:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -70,6 +83,7 @@
       synchronous: no
 
   - name: Upload a manifest
+    when: upload_manifest | default(false)
     katello_manifest:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -92,6 +106,7 @@
         basearch: x86_64
       state: enabled
   - name: Sync RH repositories
+    when: sync_repos | default(false)
     katello_sync:
       username: "{{ foreman_username }}"
       password: "{{ foreman_password }}"
@@ -101,4 +116,109 @@
       product: Red Hat Enterprise Linux Server
       repository: Red Hat Enterprise Linux 7 Server RPMs x86_64 7Server
       synchronous: no
+
+  - name: Create a sync plan
+    katello_sync_plan:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      name: Weekly
+      organization: Default Organization
+      enabled: true
+      interval: weekly
+      sync_date: "2018-01-06 02:00:00" # every sunday at 2am
+      products:
+        - name: custom
+        - name: Red Hat Enterprise Linux Server
+
+  - name: Create lifecycle environments
+    block:
+      - name: Create lifecycle environment Devel
+        katello_lifecycle_environment:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          organization: Default Organization
+          name: Devel
+          prior: Library
+      - name: Create lifecycle environment Test
+        katello_lifecycle_environment:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          organization: Default Organization
+          name: Test
+          prior: Devel
+      - name: Create lifecycle environment Production
+        katello_lifecycle_environment:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          organization: Default Organization
+          name: Production
+          prior: Test
+
+  - name: Create content view cv1
+    katello_content_view:
+      username: "{{ foreman_username }}"
+      password: "{{ foreman_password }}"
+      server_url: "{{ foreman_server_url }}"
+      verify_ssl: "{{ foreman_verify_ssl }}"
+      name: cv1
+      organization: Default Organization
+      repositories:
+        - name: zoo
+          product: custom
+
+  - name: Publish and promote the content view
+    block:
+      - name: Publish and promote content view version 1.0 to Library
+        katello_content_view_version:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          content_view: cv1
+          organization: Default Organization
+          force: true
+          version: 1.0
+      - name: Publish and promote content view version 2.0 to Library
+        katello_content_view_version:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          content_view: cv1
+          organization: Default Organization
+          force: true
+          version: 2.0
+      - name: Promote cv1 Library to the Devel and Test environments
+        katello_content_view_version:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          content_view: cv1
+          organization: Default Organization
+          force: true
+          current_lifecycle_environment: Library
+          lifecycle_environments:
+            - Devel
+            - Test
+      - name: Promote version 1.0 to the Production environment
+        katello_content_view_version:
+          username: "{{ foreman_username }}"
+          password: "{{ foreman_password }}"
+          server_url: "{{ foreman_server_url }}"
+          verify_ssl: "{{ foreman_verify_ssl }}"
+          content_view: cv1
+          organization: Default Organization
+          force: true
+          version: 1.0
+          lifecycle_environments:
+            - Production
 ...
