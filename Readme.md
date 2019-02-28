@@ -1,4 +1,4 @@
-# katello-devel-seeds
+# katello-ansible-seeds
 
 ## Configure
 
