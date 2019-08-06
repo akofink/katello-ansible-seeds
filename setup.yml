@@ -5,6 +5,7 @@
       git:
         repo: https://github.com/theforeman/foreman-ansible-modules.git
         dest: "{{ playbook_dir }}/foreman-ansible-modules"
+        remote: upstream
     - name: Install dependencies
       pip:
         requirements: "{{ playbook_dir }}/foreman-ansible-modules/requirements.txt"
